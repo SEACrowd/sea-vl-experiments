@@ -33,7 +33,6 @@ def main():
             "caption_attribution_description": [],
             "caption_alt_text_description": [],
             "mime_type": [],
-            "image/jpeg": [],
             "original_height": [],
             "original_width": [],
             "is_main_image": [],
