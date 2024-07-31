@@ -1,0 +1,6 @@
+datasets
+pandas
+seacrowd
+tldextract
+tqdm
+wikipedia-api
