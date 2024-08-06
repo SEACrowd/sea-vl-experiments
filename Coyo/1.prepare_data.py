@@ -5,6 +5,8 @@ import datasets
 import pandas as pd
 
 ds = load_dataset("kakaobrain/coyo-700m")['train']
+sea_vqa_dataset = load_dataset('wit543/sea-vqa')
+cvqa = load_dataset('afaji/cvqa')['test']
 
 sample_size = len(ds)
 country_list = {'kh','th','la','id','mm','ph','vn','tl','bn','my','sg'}
