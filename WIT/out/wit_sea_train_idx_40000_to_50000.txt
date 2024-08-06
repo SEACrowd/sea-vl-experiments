@@ -1,0 +1,7 @@
+subsets: dset['train'].select(range(40000, 50000))
+data count: 10000
+uniq title: 9712
+no_page #: 0
+no_sea_flags #: 9627
+sea_related (flag multi-match): Counter({'Indonesia': 129, 'Indonesian': 105, 'Vietnam': 95, 'Philippine': 82, 'Philippines': 72, 'Vietnamese': 69, 'Malay': 58, 'Thai': 53, 'Malaysia': 42, 'Thailand': 27, 'Southeast Asia': 21, 'Singapore': 16, 'Myanmar': 16, 'Laos': 12, 'Cambodia': 9, 'Khmer': 8, 'Burmese': 7, 'Brunei': 3, 'Laotian': 1, 'East Timor': 1, 'Cambodian': 1, 'Bruneian': 1})
+sea_related #: 373
