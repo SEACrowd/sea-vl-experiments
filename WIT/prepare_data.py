@@ -71,10 +71,7 @@ def get_sea_related_stats(i):
 #%%
 def main():
     if int(os.getenv("SEAVL_WIT_DONT_USE_SEACROWD_PKG", 0)):
-        dset = load_dataset(
-            "seacrowd-datahub/seacrowd/sea_datasets/wit/wit.py",
-            name="wit_source",
-        )
+        dset = load_dataset("SEACrowd/wit", name="wit_source")
     else:
         dset = sc.load_dataset_by_config_name("wit_source")
 
