@@ -1,0 +1,7 @@
+subsets: dset['validation'].select(range(0, 8393))
+data count: 8393
+uniq title: 7294
+no_page #: 0
+no_sea_flags #: 8086
+sea_related (flag multi-match): Counter({'Indonesia': 95, 'Vietnam': 92, 'Vietnamese': 73, 'Indonesian': 72, 'Philippine': 59, 'Malay': 51, 'Thai': 44, 'Philippines': 41, 'Malaysia': 33, 'Thailand': 27, 'Southeast Asia': 16, 'Myanmar': 13, 'Khmer': 10, 'Cambodia': 10, 'Singapore': 7, 'Laos': 6, 'Burmese': 4, 'Laotian': 3, 'Cambodian': 2, 'East Timor': 2, 'Brunei': 1})
+sea_related #: 307
