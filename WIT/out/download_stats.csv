@@ -1,0 +1,12 @@
+subset, filtered_cnt, unique_cnt, unique_percentage
+    test, 306, 214,  69.9%
+   valid, 307, 251,  81.8%
+  train0, 371, 367,  98.9%
+  train1, 382, 381,  99.7%
+  train2, 397, 395,  99.5%
+  train3, 372, 371,  99.7%
+  train4, 373, 373, 100.0%
+  train5, 371, 369,  99.5%
+  train6, 391, 389,  99.5%
+  train7, 361, 361, 100.0%
+train(0-7), 3018, 2946,  97.6%
