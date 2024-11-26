@@ -1,0 +1,6 @@
+pandas
+pngquant
+heic2png
+google-api-python-client
+tqdm
+Pillow
