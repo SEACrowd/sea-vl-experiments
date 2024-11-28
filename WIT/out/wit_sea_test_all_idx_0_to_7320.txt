@@ -1,7 +1,0 @@
-subsets: dset['test'].select(range(0, 7320))
-data count: 7320
-uniq title: 6443
-no_page #: 0
-no_sea_flags #: 7014
-sea_related (flag multi-match): Counter({'Philippine': 92, 'Vietnam': 82, 'Indonesia': 78, 'Indonesian': 72, 'Philippines': 69, 'Vietnamese': 56, 'Thai': 50, 'Malay': 35, 'Thailand': 26, 'Malaysia': 23, 'Southeast Asia': 13, 'Khmer': 13, 'Cambodia': 11, 'Singapore': 11, 'Myanmar': 11, 'Laos': 10, 'Brunei': 2, 'Cambodian': 2, 'Laotian': 2, 'Burmese': 2, 'East Timor': 1, 'Bruneian': 1})
-sea_related #: 306
