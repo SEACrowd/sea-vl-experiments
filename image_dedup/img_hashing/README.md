@@ -82,4 +82,25 @@ python main.py path/to/folder --hash-type phash --threshold 8 --csv path/to/outp
 python main.py path/to/images --hash-type phash --threshold 8 --csv duplicates.csv --print
 ```
 
-This will find duplicate images in the specified folder, print the groups of duplicates, and save the results in a CSV file.
+This will find duplicate images in the specified folder, print the groups of duplicates.
+
+
+```
+python main.py path/to/images --hash-type phash --threshold 8 --csv duplicates.csv --csv
+```
+
+This will find duplicate images in the specified folder, save the results in a CSV file.
+
+
+```
+python main.py path/to/images --hash-type phash --threshold 8 --csv duplicates.csv --remove
+```
+
+This will find duplicate images in the specified folder, remove the duplicate images.
+
+
+```
+python main.py path/to/images --hash-type phash --threshold 8 --csv duplicates.csv --all
+```
+
+This will find duplicate images in the specified folder, print the groups of duplicates, save the results in a CSV file and remove the duplicate images.
