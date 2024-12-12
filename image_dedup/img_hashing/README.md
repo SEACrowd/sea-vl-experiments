@@ -12,11 +12,11 @@ The proposed image deduplication methodology can be described as follows:
    where H is a hash function, such as average hash, phash, dhash, etc.
 
 2. **Hamming Distance**  
-   The similarity between two images I₁ and I₂ is determined by the Hamming distance D(h(I₁), h(I₂)) between their perceptual hashes:
+   The similarity between two images I₁ and I₂ is determined by the Hamming distance D(h(I₁), h(I₂)) between their hashes:
 
    D(h(I₁), h(I₂)) = Hamming distance(h(I₁), h(I₂)) = Σ|hᵢ(I₁) - hᵢ(I₂)|
 
-   where hᵢ(I) is the i-th bit of the perceptual hash h(I), and n is the length of the hash.
+   where hᵢ(I) is the i-th bit of the hash h(I), and n is the length of the hash.
 
 3. **Thresholding for Grouping**  
    If the Hamming distance between two images is below a predefined threshold T, the images are considered similar:
