@@ -4,25 +4,24 @@ A Python library for finding duplicate and similar images using perceptual hashi
 
 The proposed image deduplication methodology can be described as follows:
 
-1. **Hashing**:  
-   Each image \( I \) is transformed into a hash \( h(I) \) using a hash function \( H \):
-   \[
+1. **Hashing**  
+   Each image I is transformed into a hash h(I) using a hash function H:
+
    h(I) = H(I)
-   \]
-   where \( H \) is a perceptual hash function, such as average hash, phash, dhash, etc.
 
-2. **Hamming Distance**:  
-   The similarity between two images \( I_1 \) and \( I_2 \) is determined by the Hamming distance \( D(h(I_1), h(I_2)) \) between their perceptual hashes:
-   \[
-   D(h(I_1), h(I_2)) = \text{Hamming distance}(h(I_1), h(I_2)) = \sum_{i=1}^n |h_i(I_1) - h_i(I_2)|
-   \]
-   where \( h_i(I) \) is the \( i \)-th bit of the perceptual hash \( h(I) \), and \( n \) is the length of the hash.
+   where H is a hash function, such as average hash, phash, dhash, etc.
 
-3. **Thresholding for Grouping**:  
-   If the Hamming distance between two images is below a predefined threshold \( T \), the images are considered similar:
-   \[
-   D(h(I_1), h(I_2)) \leq T \quad \Rightarrow \quad \text{Images } I_1 \text{ and } I_2 \text{ are grouped together}
-   \]
+2. **Hamming Distance**  
+   The similarity between two images I₁ and I₂ is determined by the Hamming distance D(h(I₁), h(I₂)) between their perceptual hashes:
+
+   D(h(I₁), h(I₂)) = Hamming distance(h(I₁), h(I₂)) = Σ|hᵢ(I₁) - hᵢ(I₂)|
+
+   where hᵢ(I) is the i-th bit of the perceptual hash h(I), and n is the length of the hash.
+
+3. **Thresholding for Grouping**  
+   If the Hamming distance between two images is below a predefined threshold T, the images are considered similar:
+
+   D(h(I₁), h(I₂)) ≤ T → Images I₁ and I₂ are grouped together
 
 ## Setup
 
