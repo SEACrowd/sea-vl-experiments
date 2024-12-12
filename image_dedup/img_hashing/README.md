@@ -1,6 +1,6 @@
 # Image Deduplicator
 
-A Python library for finding duplicate and similar images using perceptual hashing techniques.
+A Python module for finding duplicate and similar images using hashing techniques.
 
 The proposed image deduplication methodology can be described as follows:
 
