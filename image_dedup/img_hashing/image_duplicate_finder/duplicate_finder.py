@@ -117,7 +117,7 @@ class ImageDuplicateFinder:
         if not folder.exists():
             raise ValueError(f"Folder {folder_path} does not exist")
 
-        image_extensions = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff"}
+        image_extensions = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".heic"}
         image_hashes = {}
         image_paths = list(folder.rglob("*"))
 
