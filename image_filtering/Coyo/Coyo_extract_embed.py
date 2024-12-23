@@ -1,8 +1,4 @@
 import os, sys
-os.environ['CUDA_VISIBLE_DEVICES'] = '6'
-os.environ["TRANSFORMERS_CACHE"]="/workspace/cache"
-os.environ["HF_DATASETS_CACHE"]="/workspace/cache" 
-
 import pandas as pd
 import numpy as np
 
@@ -44,6 +40,25 @@ cvqa_sea_subsets = [
 ]
 cvqa_dataset_filt = cvqa_dataset['test'].filter(lambda x: str(x['Subset']) in cvqa_sea_subsets, num_proc=32)
 
+
+sea_vqa_images_filt = []
+sea_vqa_images_embed = []
+sea_vqa_caption = []
+sea_vqa_culture = []
+for key in sea_vqa_dataset.keys():
+    for row in tqdm(sea_vqa_dataset[key]):
+        try:
+            img_opened = Image.open(requests.get(row['image_path'], stream=True).raw)
+            sea_vqa_images_embed.append(model.encode(img_opened))
+            sea_vqa_images_filt.append(img_opened)
+            if row['correct_answer'] in ['a', 'b', 'c', 'd']:
+                sea_vqa_caption.append(row['question'] + " " + row['choice_' + row['correct_answer']])
+            else:
+                sea_vqa_caption.append(row['question'])
+            sea_vqa_culture.append(key)
+        except:
+            print(row)
+pickle.dump((sea_vqa_images_filt, sea_vqa_images_embed, sea_vqa_caption, sea_vqa_culture), open('sea_vqa.pkl', 'wb'))
 (sea_vqa_images_filt, sea_vqa_images_embed, sea_vqa_caption, sea_vqa_culture) = pickle.load(open('sea_vqa.pkl', 'rb'))
 
 print("CVQA encoding")
