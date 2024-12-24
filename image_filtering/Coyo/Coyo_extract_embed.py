@@ -12,9 +12,9 @@ import torch
 import os
 import requests
 from tqdm import tqdm
-import pickle 
+import pickle
 from PIL import Image
-from PIL import ImageFile                                                      
+from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 from glob import glob
@@ -22,7 +22,7 @@ import time
 
 import warnings
 
-warnings.filterwarnings('ignore') 
+warnings.filterwarnings('ignore')
 
 model = SentenceTransformer("sentence-transformers/clip-ViT-B-32").to('cuda')
 
@@ -38,28 +38,30 @@ cvqa_sea_subsets = [
     "('Sundanese', 'Indonesia')",
     "('Chinese', 'Singapore')"
 ]
-cvqa_dataset_filt = cvqa_dataset['test'].filter(lambda x: str(x['Subset']) in cvqa_sea_subsets, num_proc=32)
+cvqa_dataset_filt = cvqa_dataset['test'].filter(lambda x: str(x['Subset']) in cvqa_sea_subsets, num_proc=8)
 
 
-sea_vqa_images_filt = []
-sea_vqa_images_embed = []
-sea_vqa_caption = []
-sea_vqa_culture = []
-for key in sea_vqa_dataset.keys():
-    for row in tqdm(sea_vqa_dataset[key]):
-        try:
-            img_opened = Image.open(requests.get(row['image_path'], stream=True).raw)
-            sea_vqa_images_embed.append(model.encode(img_opened))
-            sea_vqa_images_filt.append(img_opened)
-            if row['correct_answer'] in ['a', 'b', 'c', 'd']:
-                sea_vqa_caption.append(row['question'] + " " + row['choice_' + row['correct_answer']])
-            else:
-                sea_vqa_caption.append(row['question'])
-            sea_vqa_culture.append(key)
-        except:
-            print(row)
-pickle.dump((sea_vqa_images_filt, sea_vqa_images_embed, sea_vqa_caption, sea_vqa_culture), open('sea_vqa.pkl', 'wb'))
-(sea_vqa_images_filt, sea_vqa_images_embed, sea_vqa_caption, sea_vqa_culture) = pickle.load(open('sea_vqa.pkl', 'rb'))
+fp_ds_emb = "sea_vqa.pkl"
+if not os.path.isfile(fp_ds_emb):
+    sea_vqa_images_filt = []
+    sea_vqa_images_embed = []
+    sea_vqa_caption = []
+    sea_vqa_culture = []
+    for key in sea_vqa_dataset.keys():
+        for row in tqdm(sea_vqa_dataset[key]):
+            try:
+                img_opened = Image.open(requests.get(row['image_path'], stream=True).raw)
+                sea_vqa_images_embed.append(model.encode(img_opened))
+                sea_vqa_images_filt.append(img_opened)
+                if row['correct_answer'] in ['a', 'b', 'c', 'd']:
+                    sea_vqa_caption.append(row['question'] + " " + row['choice_' + row['correct_answer']])
+                else:
+                    sea_vqa_caption.append(row['question'])
+                sea_vqa_culture.append(key)
+            except:
+                print(row)
+    pickle.dump((sea_vqa_images_filt, sea_vqa_images_embed, sea_vqa_caption, sea_vqa_culture), open(fp_ds_emb, 'wb'))
+(sea_vqa_images_filt, sea_vqa_images_embed, sea_vqa_caption, sea_vqa_culture) = pickle.load(open(fp_ds_emb, 'rb'))
 
 print("CVQA encoding")
 cvqa_images_filt = []
@@ -89,7 +91,7 @@ for row in tqdm(cvqa_dataset['test']):
 pickle.dump((cvqa_images_embed, cvqa_caption, cvqa_culture, cvqa_category), open('cvqa_category_all.pkl', 'wb'))
 
 
-bs = 64
+bs = 16
 coyo_images_embed = []
 coyo_images_filt = []
 coyo_caption = []
