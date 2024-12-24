@@ -43,6 +43,7 @@ cvqa_dataset_filt = cvqa_dataset['test'].filter(lambda x: str(x['Subset']) in cv
 
 fp_ds_emb = "sea_vqa.pkl"
 if not os.path.isfile(fp_ds_emb):
+    print(f"Generating Encoding: {fp_ds_emb}.")
     sea_vqa_images_filt = []
     sea_vqa_images_embed = []
     sea_vqa_caption = []
@@ -63,32 +64,36 @@ if not os.path.isfile(fp_ds_emb):
     pickle.dump((sea_vqa_images_filt, sea_vqa_images_embed, sea_vqa_caption, sea_vqa_culture), open(fp_ds_emb, 'wb'))
 (sea_vqa_images_filt, sea_vqa_images_embed, sea_vqa_caption, sea_vqa_culture) = pickle.load(open(fp_ds_emb, 'rb'))
 
-print("CVQA encoding")
-cvqa_images_filt = []
-cvqa_images_embed = []
-cvqa_caption = []
-cvqa_culture = []
-for row in tqdm(cvqa_dataset_filt):
-    try:
-        cvqa_images_embed.append(model.encode(row['image']))
-        cvqa_images_filt.append(row['image'])
-        cvqa_caption.append(row['Translated Question'] + " " + ', '.join(row['Translated Options']))
-        cvqa_culture.append(eval(row['Subset'])[0])
-    except:
-        print(row)
-cvqa_images_embed = []
-cvqa_caption = []
-cvqa_culture = []
-cvqa_category = []
-for row in tqdm(cvqa_dataset['test']):
-    try:
-        cvqa_images_embed.append(model.encode(row['image']))
-        cvqa_caption.append(row['Translated Question'] + " " + ', '.join(row['Translated Options']))
-        cvqa_culture.append(eval(row['Subset'])[0])
-        cvqa_category.append(row['Category'])
-    except:
-        print(row)
-pickle.dump((cvqa_images_embed, cvqa_caption, cvqa_culture, cvqa_category), open('cvqa_category_all.pkl', 'wb'))
+# print("CVQA encoding")
+fp_ds_emb = "cvqa_category_all.pkl"
+if not os.path.isfile(fp_ds_emb):
+    print(f"Generating Encoding: {fp_ds_emb}")
+    cvqa_images_filt = []
+    cvqa_images_embed = []
+    cvqa_caption = []
+    cvqa_culture = []
+    for row in tqdm(cvqa_dataset_filt):
+        try:
+            cvqa_images_embed.append(model.encode(row['image']))
+            cvqa_images_filt.append(row['image'])
+            cvqa_caption.append(row['Translated Question'] + " " + ', '.join(row['Translated Options']))
+            cvqa_culture.append(eval(row['Subset'])[0])
+        except:
+            print(row)
+    cvqa_images_embed = []
+    cvqa_caption = []
+    cvqa_culture = []
+    cvqa_category = []
+    for row in tqdm(cvqa_dataset['test']):
+        try:
+            cvqa_images_embed.append(model.encode(row['image']))
+            cvqa_caption.append(row['Translated Question'] + " " + ', '.join(row['Translated Options']))
+            cvqa_culture.append(eval(row['Subset'])[0])
+            cvqa_category.append(row['Category'])
+        except:
+            print(row)
+    pickle.dump((cvqa_images_embed, cvqa_caption, cvqa_culture, cvqa_category), open(fp_ds_emb, 'wb'))
+(cvqa_images_embed, cvqa_caption, cvqa_culture, cvqa_category) = open(fp_ds_emb, 'rb')
 
 
 bs = 16
