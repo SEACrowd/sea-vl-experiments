@@ -93,7 +93,7 @@ if not os.path.isfile(fp_ds_emb):
         except:
             print(row)
     pickle.dump((cvqa_images_embed, cvqa_caption, cvqa_culture, cvqa_category), open(fp_ds_emb, 'wb'))
-(cvqa_images_embed, cvqa_caption, cvqa_culture, cvqa_category) = open(fp_ds_emb, 'rb')
+(cvqa_images_embed, cvqa_caption, cvqa_culture, cvqa_category) = pickle.load(open(fp_ds_emb, 'rb'))
 
 
 bs = 16
