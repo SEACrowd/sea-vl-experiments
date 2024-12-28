@@ -96,7 +96,7 @@ if not os.path.isfile(fp_ds_emb):
 (cvqa_images_embed, cvqa_caption, cvqa_culture, cvqa_category) = pickle.load(open(fp_ds_emb, 'rb'))
 
 
-bs = 16
+bs = 64
 coyo_images_embed = []
 coyo_images_filt = []
 coyo_caption = []
@@ -119,14 +119,14 @@ print("Image encoding")
 loader = DataLoader(dset, batch_size=bs, num_workers=bs, prefetch_factor=8, collate_fn=lambda x: {k: [row[k] for row in x] for k in x[0]})
 for i, batch in tqdm(enumerate(loader),total=len(dset)):
     imgs = []
-    for i, img in enumerate(batch['image']):
+    for j, img in enumerate(batch['image']):
         if img is not None:
             if img.size[0] < 50 or img.size[1] < 50:
                 continue
             imgs.append(img)
-            coyo_images_filt.append(batch['url'][i])
-            coyo_caption.append(batch['text'][i])
-    
+            coyo_images_filt.append(batch['url'][j])
+            coyo_caption.append(batch['text'][j])
+
     img_embeds = model.encode(imgs, batch_size=bs)
     for img_emb in img_embeds:
         coyo_images_embed.append(img_emb)
