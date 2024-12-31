@@ -104,43 +104,59 @@ if not os.path.isfile(fp_ds_emb):
 print(f"Loading Encoding: {fp_ds_emb}.")
 (cvqa_images_embed, cvqa_caption, cvqa_culture, cvqa_category) = pickle.load(open(fp_ds_emb, 'rb'))
 
-bs = 64
-coyo_images_embed = []
-coyo_images_filt = []
-coyo_caption = []
 
-def invalid_images_as_none(batch):
+####################
+# Coyo Emb.
+####################
+def invalid_images_as_none(cur_batch):
     images = []
-    for image_url in batch["url"]:
+    for image_url in cur_batch["url"]:
         try:
             image = Image.open(requests.get(image_url, stream=True, timeout=8).raw).convert('RGB')
         except Exception:
             image = None
         images.append(image)
-    batch["image"] = images
-    return batch
-
 dset = load_dataset("kakaobrain/coyo-700m")['train']
 dset = dset.with_transform(invalid_images_as_none)
 
-print("Image encoding")
-loader = DataLoader(dset, batch_size=bs, num_workers=bs, prefetch_factor=8, collate_fn=lambda x: {k: [row[k] for row in x] for k in x[0]})
-for i, batch in tqdm(enumerate(loader),total=len(dset)):
-    imgs = []
-    for j, img in enumerate(batch['image']):
-        if img is not None:
-            if img.size[0] < 50 or img.size[1] < 50:
-                continue
-            imgs.append(img)
-            coyo_images_filt.append(batch['url'][j])
-            coyo_caption.append(batch['text'][j])
+    cur_batch["image"] = images
+    return cur_batch
 
-    img_embeds = model.encode(imgs, batch_size=bs)
-    for img_emb in img_embeds:
-        coyo_images_embed.append(img_emb)
 
-    if i == len(loader) - 1:
-        break
+bs = int(os.getenv('SEAVL_COYO_BATCH_SIZE', '512'))    # for GPU
+num_proc = int(os.getenv('SEAVL_COYO_NUM_WORKERS', '0')) or None    # for CPU
+print(f"batch size: {bs};    num_proc: {num_proc};")
 
+print(f"Preparing dataloader ..")
+loader = DataLoader(dset, batch_size=bs, num_workers=num_proc, prefetch_factor=4, collate_fn=lambda x: {k: [row[k] for row in x] for k in x[0]})
+print(f"batch count (dataloader): {len(loader):,}")
+
+print("Start image encoding ..")
+indices, imgs, coyo_images_filt, coyo_caption = [], [], [], []
+current_run_fn = f"coyo_emb"
+with open(f"output/{current_run_fn}.pkl", "wb") as opt:
+    def flush():
+        global indices, imgs, coyo_images_filt, coyo_caption
+        img_embeds = list(model.encode(imgs, batch_size=bs))
+        pickle.dump((indices, coyo_images_filt, img_embeds, coyo_caption,), opt)
+        indices, imgs, coyo_images_filt, coyo_caption = [], [], [], []
+
+    with tqdm(total=len(dset)) as pbar:
+        for batch in loader:
+            for j, img in enumerate(batch['image']):
+                if (img is not None) and (img.size[0] >= 50) and (img.size[1] >= 50):
+                    # indices.append(pbar.n)
+                    indices.append(batch['id'][j])
+                    imgs.append(img)
+                    coyo_images_filt.append(batch['url'][j])
+                    coyo_caption.append(batch['text'][j])
+                    if len(imgs) >= bs:
+                        flush()
+                pbar.update(1)
+        if imgs:
+            flush()
+
+    # for img_emb in img_embeds:
+    #     coyo_images_embed.append(img_emb)
 # print(len(coyo_images_embed), len(coyo_images_filt), len(coyo_caption), flush=True)
-pickle.dump((coyo_images_filt, coyo_images_embed, coyo_caption, []), open('./coyo_full.pkl', 'wb'))
+# pickle.dump((coyo_images_filt, coyo_images_embed, coyo_caption, []), open('./coyo_full.pkl', 'wb'))
