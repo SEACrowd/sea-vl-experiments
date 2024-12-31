@@ -147,7 +147,7 @@ bs = int(os.getenv('SEAVL_COYO_BATCH_SIZE', '512'))    # for GPU
 num_proc = int(os.getenv('SEAVL_COYO_NUM_WORKERS', '0')) or None    # for CPU
 print(f"batch size: {bs};    num_proc: {num_proc};")
 
-coyo_dset_range_str = os.getenv('SEAVL_COYO_DSET_SELECT', '0-746972268')
+coyo_dset_range_str = os.getenv('SEAVL_COYO_DSET_SELECT', '0-746972268')    # inclusive values. COYO trainset count is 746,972,269
 coyo_dset_range = retrieve_idx(coyo_dset_range_str)[0]
 print(f"COYO dataset range: {coyo_dset_range}")
 
@@ -160,7 +160,7 @@ batch_indices = retrieve_idx(batch_indices_str)
 
 dsets, dset_coyo = [], None
 for batch_idx in chain(*batch_indices):
-    current_dset_fn = f"coyo_rg{coyo_dset_range}_{batch_idx}of{batch_cnt}"
+    current_dset_fn = f"coyo_rg{coyo_dset_range_str}_{batch_idx}of{batch_cnt}"
     print(current_dset_fn)
 
     print(f"Loading COYO dataset (train)")
