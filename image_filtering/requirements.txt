@@ -1,0 +1,7 @@
+pandas
+numpy
+tqdm
+torch
+pillow
+datasets
+sentence_transformers
