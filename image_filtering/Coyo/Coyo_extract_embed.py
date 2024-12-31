@@ -2,19 +2,15 @@ import os, sys
 import pandas as pd
 import numpy as np
 
-import datasets
-from datasets import load_dataset
-import datasets
+from datasets import load_dataset, load_from_disk, concatenate_datasets
 from sentence_transformers import SentenceTransformer
 from torch.utils.data import DataLoader
-import torch
 
 import os
 import requests
 from tqdm import tqdm
 import pickle
-from PIL import Image
-from PIL import ImageFile
+from PIL import Image, ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 from glob import glob
@@ -24,26 +20,20 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-model = SentenceTransformer("sentence-transformers/clip-ViT-B-32").to('cuda')
 
-sea_vqa_dataset = load_dataset('wit543/sea-vqa')
-
-cvqa_dataset = load_dataset('afaji/cvqa')
-
-cvqa_sea_subsets = [
-    "('Indonesian', 'Indonesia')",
-    "('Malay', 'Malaysia')",
-    "('Javanese', 'Indonesia')",
-    "('Minangkabau', 'Indonesia')",
-    "('Sundanese', 'Indonesia')",
-    "('Chinese', 'Singapore')"
-]
-cvqa_dataset_filt = cvqa_dataset['test'].filter(lambda x: str(x['Subset']) in cvqa_sea_subsets, num_proc=8)
+else:
+    print("Loading model ..")
+    model = SentenceTransformer("sentence-transformers/clip-ViT-B-32", device='cuda')
+    print("Model loaded.")
 
 
+####################
+# SEA-VQA Emb.
+####################
 fp_ds_emb = "sea_vqa.pkl"
 if not os.path.isfile(fp_ds_emb):
     print(f"Generating Encoding: {fp_ds_emb}.")
+    sea_vqa_dataset = load_dataset('wit543/sea-vqa')
     sea_vqa_images_filt = []
     sea_vqa_images_embed = []
     sea_vqa_caption = []
@@ -62,24 +52,41 @@ if not os.path.isfile(fp_ds_emb):
             except:
                 print(row)
     pickle.dump((sea_vqa_images_filt, sea_vqa_images_embed, sea_vqa_caption, sea_vqa_culture), open(fp_ds_emb, 'wb'))
+print(f"Loading Encoding: {fp_ds_emb}.")
 (sea_vqa_images_filt, sea_vqa_images_embed, sea_vqa_caption, sea_vqa_culture) = pickle.load(open(fp_ds_emb, 'rb'))
 
+
+####################
+# CVQA Emb.
+####################
 # print("CVQA encoding")
 fp_ds_emb = "cvqa_category_all.pkl"
 if not os.path.isfile(fp_ds_emb):
     print(f"Generating Encoding: {fp_ds_emb}")
-    cvqa_images_filt = []
-    cvqa_images_embed = []
-    cvqa_caption = []
-    cvqa_culture = []
-    for row in tqdm(cvqa_dataset_filt):
-        try:
-            cvqa_images_embed.append(model.encode(row['image']))
-            cvqa_images_filt.append(row['image'])
-            cvqa_caption.append(row['Translated Question'] + " " + ', '.join(row['Translated Options']))
-            cvqa_culture.append(eval(row['Subset'])[0])
-        except:
-            print(row)
+    cvqa_dataset = load_dataset('afaji/cvqa')
+    cvqa_sea_subsets = [
+        "('Indonesian', 'Indonesia')",
+        "('Malay', 'Malaysia')",
+        "('Javanese', 'Indonesia')",
+        "('Minangkabau', 'Indonesia')",
+        "('Sundanese', 'Indonesia')",
+        "('Chinese', 'Singapore')"
+    ]
+    cvqa_dataset_filt = cvqa_dataset['test'].filter(lambda x: str(x['Subset']) in cvqa_sea_subsets, num_proc=8)
+
+    #cvqa_images_filt = []
+    #cvqa_images_embed = []
+    #cvqa_caption = []
+    #cvqa_culture = []
+    #for row in tqdm(cvqa_dataset_filt):
+    #    try:
+    #        cvqa_images_embed.append(model.encode(row['image']))
+    #        cvqa_images_filt.append(row['image'])
+    #        cvqa_caption.append(row['Translated Question'] + " " + ', '.join(row['Translated Options']))
+    #        cvqa_culture.append(eval(row['Subset'])[0])
+    #    except:
+    #        print(row)
+
     cvqa_images_embed = []
     cvqa_caption = []
     cvqa_culture = []
@@ -93,8 +100,9 @@ if not os.path.isfile(fp_ds_emb):
         except:
             print(row)
     pickle.dump((cvqa_images_embed, cvqa_caption, cvqa_culture, cvqa_category), open(fp_ds_emb, 'wb'))
-(cvqa_images_embed, cvqa_caption, cvqa_culture, cvqa_category) = pickle.load(open(fp_ds_emb, 'rb'))
 
+print(f"Loading Encoding: {fp_ds_emb}.")
+(cvqa_images_embed, cvqa_caption, cvqa_culture, cvqa_category) = pickle.load(open(fp_ds_emb, 'rb'))
 
 bs = 64
 coyo_images_embed = []
