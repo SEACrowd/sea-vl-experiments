@@ -16,10 +16,14 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 from glob import glob
 import time
 
+from itertools import chain
+
 import warnings
 
 warnings.filterwarnings('ignore')
 
+if os.getenv('SEAVL_COYO_PREDOWNLOAD_ONLY', None):
+    print("... Download images then exit ...")
 
 else:
     print("Loading model ..")
@@ -116,16 +120,79 @@ def invalid_images_as_none(cur_batch):
         except Exception:
             image = None
         images.append(image)
-dset = load_dataset("kakaobrain/coyo-700m")['train']
-dset = dset.with_transform(invalid_images_as_none)
-
     cur_batch["image"] = images
     return cur_batch
+
+
+def filter_notna_nor_tiny(d):
+    img = d['image']
+    return (img is not None) and (img.size[0] >= 50) and (img.size[1] >= 50)
+
+
+def chunk_into(n, k, i):
+    sz = n // k
+    st = (i * sz) + (i if i < (n % k) else n % k)
+    ed = st + sz + (1 if i < (n % k) else 0)
+    return st, ed
+
+
+def retrieve_idx(indices):
+    ret = []
+    for rg in (list(map(int, rg.split('-'))) for rg in indices.split(',')):
+        ret.append(range(rg[0], rg[-1] + 1))
+    return ret
 
 
 bs = int(os.getenv('SEAVL_COYO_BATCH_SIZE', '512'))    # for GPU
 num_proc = int(os.getenv('SEAVL_COYO_NUM_WORKERS', '0')) or None    # for CPU
 print(f"batch size: {bs};    num_proc: {num_proc};")
+
+coyo_dset_range_str = os.getenv('SEAVL_COYO_DSET_SELECT', '0-746972268')
+coyo_dset_range = retrieve_idx(coyo_dset_range_str)[0]
+print(f"COYO dataset range: {coyo_dset_range}")
+
+batch_cnt = int(os.getenv('SEAVL_COYO_SPLIT_CNT', '1'))
+print(f"split count: {batch_cnt:,}")
+
+batch_indices_str = os.getenv('SEAVL_COYO_SPLIT_IDX', '0')
+print(f"split indices (0-based): {batch_indices_str}.")
+batch_indices = retrieve_idx(batch_indices_str)
+
+dsets, dset_coyo = [], None
+for batch_idx in chain(*batch_indices):
+    current_dset_fn = f"coyo_rg{coyo_dset_range}_{batch_idx}of{batch_cnt}"
+    print(current_dset_fn)
+
+    print(f"Loading COYO dataset (train)")
+    if not os.path.isdir(f"preload_dset/{current_dset_fn}"):
+        if dset_coyo is None:
+            dset_coyo = load_dataset("kakaobrain/coyo-700m", split='train', num_proc=num_proc).select(coyo_dset_range)
+        dset = dset_coyo
+        print(f"dataset loaded. dset count: {len(dset):,}")
+        cur_st, cur_ed = chunk_into(len(dset), batch_cnt, batch_idx)
+        print("slice the dataset according to chunk-split")
+        dset = dset.select(range(cur_st, cur_ed))
+        print(f"    > i.e. dset.select(range({cur_st:,}, {cur_ed:,}))")
+
+        if os.getenv('SEAVL_COYO_PREDOWNLOAD_ONLY', None):
+            dset = dset.map(
+                invalid_images_as_none, batched=True, batch_size=bs, num_proc=num_proc,
+                remove_columns=(set(dset.features.keys()) - {'id', 'url', 'text'}),
+            )
+            dset = dset.filter(filter_notna_nor_tiny, num_proc=num_proc)
+            dset.save_to_disk(f"preload_dset/{current_dset_fn}")
+
+    else:
+        dset = load_from_disk(f"preload_dset/{current_dset_fn}")
+        print(f"dataset loaded from disk")
+
+    dsets.append(dset)
+
+if os.getenv('SEAVL_COYO_PREDOWNLOAD_ONLY', None):
+    exit(0)
+else:
+    dset = concatenate_datasets(dsets).with_transform(invalid_images_as_none)
+    print(f"    > with_transform(invalid_images_as_none)")
 
 print(f"Preparing dataloader ..")
 loader = DataLoader(dset, batch_size=bs, num_workers=num_proc, prefetch_factor=4, collate_fn=lambda x: {k: [row[k] for row in x] for k in x[0]})
@@ -133,7 +200,7 @@ print(f"batch count (dataloader): {len(loader):,}")
 
 print("Start image encoding ..")
 indices, imgs, coyo_images_filt, coyo_caption = [], [], [], []
-current_run_fn = f"coyo_emb"
+current_run_fn = f"coyo_rg{coyo_dset_range}"
 with open(f"output/{current_run_fn}.pkl", "wb") as opt:
     def flush():
         global indices, imgs, coyo_images_filt, coyo_caption
