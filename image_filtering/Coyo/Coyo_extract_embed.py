@@ -112,21 +112,32 @@ print(f"Loading Encoding: {fp_ds_emb}.")
 ####################
 # Coyo Emb.
 ####################
+def _invalid_images_as_none_(image_url):
+    try:
+        im = Image.open(requests.get(image_url, stream=True, timeout=8).raw).convert('RGB')
+        return im if _filter_notna_nor_tiny_(im) else None
+    except Exception:
+        return None
+
 def invalid_images_as_none(cur_batch):
     images = []
     for image_url in cur_batch["url"]:
-        try:
-            image = Image.open(requests.get(image_url, stream=True, timeout=8).raw).convert('RGB')
-        except Exception:
-            image = None
-        images.append(image)
+        images.append(_invalid_images_as_none_(image_url))
     cur_batch["image"] = images
     return cur_batch
 
 
-def filter_notna_nor_tiny(d):
-    img = d['image']
+def invalid_images_as_none_single(cur_item):
+    cur_item['image'] = _invalid_images_as_none_(cur_item['url'])
+    return cur_item
+
+
+def _filter_notna_nor_tiny_(img):
     return (img is not None) and (img.size[0] >= 50) and (img.size[1] >= 50)
+
+
+def filter_notna_nor_tiny(d):
+    return _filter_notna_nor_tiny_(d['image'])
 
 
 def chunk_into(n, k, i):
@@ -136,9 +147,9 @@ def chunk_into(n, k, i):
     return st, ed
 
 
-def retrieve_idx(indices):
+def retrieve_idx(_indices):
     ret = []
-    for rg in (list(map(int, rg.split('-'))) for rg in indices.split(',')):
+    for rg in (list(map(int, rg.split('-'))) for rg in _indices.split(',')):
         ret.append(range(rg[0], rg[-1] + 1))
     return ret
 
@@ -176,10 +187,12 @@ for batch_idx in chain(*batch_indices):
 
         if os.getenv('SEAVL_COYO_PREDOWNLOAD_ONLY', None):
             dset = dset.map(
-                invalid_images_as_none, batched=True, batch_size=bs, num_proc=num_proc,
+                # invalid_images_as_none, batched=True, batch_size=bs,
+                invalid_images_as_none_single,
+                num_proc=num_proc, desc=current_dset_fn,
                 remove_columns=(set(dset.features.keys()) - {'id', 'url', 'text'}),
             )
-            dset = dset.filter(filter_notna_nor_tiny, num_proc=num_proc)
+            dset = dset.filter(filter_notna_nor_tiny, num_proc=num_proc, desc=current_dset_fn,)
             dset.save_to_disk(f"preload_dset/{current_dset_fn}")
 
     else:
