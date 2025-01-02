@@ -56,8 +56,10 @@ if not os.path.isfile(fp_ds_emb):
             except:
                 print(row)
     pickle.dump((sea_vqa_images_filt, sea_vqa_images_embed, sea_vqa_caption, sea_vqa_culture), open(fp_ds_emb, 'wb'))
-print(f"Loading Encoding: {fp_ds_emb}.")
-(sea_vqa_images_filt, sea_vqa_images_embed, sea_vqa_caption, sea_vqa_culture) = pickle.load(open(fp_ds_emb, 'rb'))
+
+if not os.getenv('SEAVL_COYO_PREDOWNLOAD_ONLY', None):
+    print(f"Loading Encoding: {fp_ds_emb}.")
+    (sea_vqa_images_filt, sea_vqa_images_embed, sea_vqa_caption, sea_vqa_culture) = pickle.load(open(fp_ds_emb, 'rb'))
 
 
 ####################
@@ -105,8 +107,9 @@ if not os.path.isfile(fp_ds_emb):
             print(row)
     pickle.dump((cvqa_images_embed, cvqa_caption, cvqa_culture, cvqa_category), open(fp_ds_emb, 'wb'))
 
-print(f"Loading Encoding: {fp_ds_emb}.")
-(cvqa_images_embed, cvqa_caption, cvqa_culture, cvqa_category) = pickle.load(open(fp_ds_emb, 'rb'))
+if not os.getenv('SEAVL_COYO_PREDOWNLOAD_ONLY', None):
+    print(f"Loading Encoding: {fp_ds_emb}.")
+    (cvqa_images_embed, cvqa_caption, cvqa_culture, cvqa_category) = pickle.load(open(fp_ds_emb, 'rb'))
 
 
 ####################
@@ -170,16 +173,17 @@ print(f"split indices (0-based): {batch_indices_str}.")
 batch_indices = retrieve_idx(batch_indices_str)
 
 dsets, dset_coyo = [], None
+print(f"Loading COYO dataset (train)")
 for batch_idx in chain(*batch_indices):
     current_dset_fn = f"coyo_rg{coyo_dset_range_str}_{batch_idx}of{batch_cnt}"
-    print(current_dset_fn)
+    print(f"dset: {current_dset_fn}")
 
-    print(f"Loading COYO dataset (train)")
     if not os.path.isdir(f"preload_dset/{current_dset_fn}"):
+        print(f"Preload dset not found. Preparing dset ..")
         if dset_coyo is None:
             dset_coyo = load_dataset("kakaobrain/coyo-700m", split='train', num_proc=num_proc).select(coyo_dset_range)
         dset = dset_coyo
-        print(f"dataset loaded. dset count: {len(dset):,}")
+        print(f"coyo dataset loaded. dset count: {len(dset):,}")
         cur_st, cur_ed = chunk_into(len(dset), batch_cnt, batch_idx)
         print("slice the dataset according to chunk-split")
         dset = dset.select(range(cur_st, cur_ed))
@@ -204,16 +208,17 @@ for batch_idx in chain(*batch_indices):
 if os.getenv('SEAVL_COYO_PREDOWNLOAD_ONLY', None):
     exit(0)
 else:
-    dset = concatenate_datasets(dsets).with_transform(invalid_images_as_none)
-    print(f"    > with_transform(invalid_images_as_none)")
+    dset = concatenate_datasets(dsets)
+    # .with_transform(invalid_images_as_none)
+    # print(f"    > with_transform(invalid_images_as_none)")
 
 print(f"Preparing dataloader ..")
-loader = DataLoader(dset, batch_size=bs, num_workers=num_proc, prefetch_factor=4, collate_fn=lambda x: {k: [row[k] for row in x] for k in x[0]})
+loader = DataLoader(dset, batch_size=bs, num_workers=num_proc or 0, prefetch_factor=2 if num_proc else None, collate_fn=lambda x: {k: [row[k] for row in x] for k in x[0]})
 print(f"batch count (dataloader): {len(loader):,}")
 
 print("Start image encoding ..")
 indices, imgs, coyo_images_filt, coyo_caption = [], [], [], []
-current_run_fn = f"coyo_rg{coyo_dset_range}"
+current_run_fn = f"coyo_rg{coyo_dset_range_str}"
 with open(f"output/{current_run_fn}.pkl", "wb") as opt:
     def flush():
         global indices, imgs, coyo_images_filt, coyo_caption
@@ -221,7 +226,7 @@ with open(f"output/{current_run_fn}.pkl", "wb") as opt:
         pickle.dump((indices, coyo_images_filt, img_embeds, coyo_caption,), opt)
         indices, imgs, coyo_images_filt, coyo_caption = [], [], [], []
 
-    with tqdm(total=len(dset)) as pbar:
+    with tqdm(total=len(dset), desc=current_run_fn) as pbar:
         for batch in loader:
             for j, img in enumerate(batch['image']):
                 if (img is not None) and (img.size[0] >= 50) and (img.size[1] >= 50):
