@@ -4,6 +4,9 @@ import requests
 
 from transformers import CLIPProcessor, CLIPModel
 
+# if you are having trouble loading this specific model, ensure you don't have a 
+# local directory containing the same model, if you do, you could use that 
+# instead and put the path to that model as the value in the model and processor
 model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
 processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
@@ -25,7 +28,7 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 from collections import defaultdict
 
-# tune eps to fit your needs
+# tune eps to fit your needs (6 is the sweet spot for me)
 clustering = DBSCAN(min_samples=2, eps=6).fit(np.stack(images_to_embeddings.values()))
 
 # postprocess cluster labels into groups of similar images
