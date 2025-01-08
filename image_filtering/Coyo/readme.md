@@ -29,7 +29,8 @@ The file to run is `Coyo_extrtact_embed.py`.
 > 
 > - `SEAVL_COYO_BATCH_SIZE`
 >   - as name suggests.
-> 
+>
+>
 > - `SEAVL_COYO_NUM_WORKERS`
 >   - as name suggests. (\# of CPU)
 >
@@ -39,7 +40,7 @@ Example env file:
 ```dotenv
 SEAVL_COYO_PREDOWNLOAD_ONLY=1
 SEAVL_COYO_SPLIT_CNT=20
-SEAVL_COYO_SPLIT_IDX="1,5-8,12,18-19"
+SEAVL_COYO_SPLIT_IDX="0,5-8,12,18-19"
 SEAVL_COYO_BATCH_SIZE=512
 SEAVL_COYO_NUM_WORKERS=2
 ```
