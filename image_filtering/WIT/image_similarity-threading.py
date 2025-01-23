@@ -32,7 +32,6 @@ Image.MAX_IMAGE_PIXELS = None
 
 
 def query_image(image=None, image_url=None, image_name=None, cache_dir=None, min_size=None):
-    # headers = {'User-Agent': f'SEACrowd/Cultural-Images (https://github.com/SEACrowd; nusacrowd@gmail.com; {os.environ["EMAIL"]})'}
     headers = {'User-Agent': 'CoolBot/0.0 (https://example.org/coolbot/; coolbot@example.org)'}
     assert image is not None or image_url is not None
     cache_path = os.path.join(cache_dir, image_name)
@@ -42,7 +41,7 @@ def query_image(image=None, image_url=None, image_name=None, cache_dir=None, min
             if os.path.isfile(cache_path):
                 image = Image.open(cache_path)
             else:
-                req = requests.get(image_url, headers=headers, stream=True, timeout=120)
+                req = requests.get(image_url, headers=headers, stream=True, timeout=20)
                 req.raise_for_status()
                 image = Image.open(req.raw)
         image = image.convert('RGB')
@@ -103,6 +102,7 @@ def get_embedding(queue, model, save_fn=None, ref_embeddings=None, threshold=0):
         print(f'Waiting to embed. Queue size: {queue.qsize()}.', flush=True)
         items = queue.get()
         started_at = time.monotonic()
+
         # filter empty images
         items = [i for i in items if 'image' in i and i['image'] is not None]
         images = [i['image'] for i in items]
@@ -122,7 +122,7 @@ def get_embedding(queue, model, save_fn=None, ref_embeddings=None, threshold=0):
             # compare scraped images to CVQA and SEA-VQA
             if ref_embeddings is not None:
                 try:
-                    sim_scores, _idx = model.similarity(ref_embeddings, embeddings).max(dim=0)
+                    sim_scores = model.similarity(ref_embeddings, embeddings).mean(dim=0)
                 except Exception as e:
                     print('ERROR:{}\nRef size:{}\nEmbedding size:{}'.format(e, ref_embeddings.shape, [e.shape for e in embeddings]), flush=True)
                     import sys; sys.exit(1)
@@ -174,7 +174,6 @@ def process_row(row, idx, queue, batch, query_fn, image_col=None, image_url_col=
     
     batch.append(image_data)
 
-    # # print('Queue size: {}, batch size: {}'.format(queue.qsize(), len(batch)))
     if queue.qsize() == 0 or last or len(batch) >= args.batch_size:
         print(f'Submitting to queue at {idx}. Queue size: {queue.qsize()}. Batch size: {len(batch)}', flush=True)
         queue.put([b for b in batch])
@@ -182,7 +181,7 @@ def process_row(row, idx, queue, batch, query_fn, image_col=None, image_url_col=
 
 
 def producer(queue, query_fn, dataset, image_col=None, image_url_col=None,
-                   image_name_col=None, image_dir=None, embed_dir=None):
+                   image_name_col=None, image_dir=None, embed_dir=None, start_idx=1, data_len=None):
     batch = []
     assert image_col is not None or image_url_col is not None
     process_fn = partial(process_row, queue=queue, batch=batch, query_fn=query_fn,
@@ -193,9 +192,12 @@ def producer(queue, query_fn, dataset, image_col=None, image_url_col=None,
     else:
         iterator = enumerate(dataset)
     
+    if data_len is None:
+        data_len = len(dataset)
     for idx, row in iterator:
-        print(f'[{idx}/{len(dataset) - 1}]. Current queue size: {queue.qsize()}', flush=True)
-        process_fn(row, idx, last=(idx == len(dataset) - 1))
+        cur_idx = start_idx + idx
+        print(f'[{cur_idx}/{data_len}]. Current queue size: {queue.qsize()}', flush=True)
+        process_fn(row, cur_idx, last=(idx == len(dataset) - 1))
     
     queue.join()
 
@@ -239,32 +241,25 @@ def main(args):
         image_col = 'image'
         image_name_col = 'ID'
         ref_embeddings = None
+
     elif args.action.lower() == 'sea-vqa':
         datasets = []
         for split in ["cambodia", "indonesia", "laos", "malaysia", "philippines", "singapore", "thailand", "vietnam"]:
             datasets.append(load_dataset('wit543/sea-vqa', split=split))
-        dataset = concatenate_datasets(datasets).to_pandas()\
-                    .drop_duplicates(subset=['image_path'], ignore_index=True).sort_values(['image_path'], ignore_index=True)
+        dataset = concatenate_datasets(datasets)
         image_url_col = 'image_path'
         image_name_col = 'question'
         ref_embeddings = None
-
     
     elif args.action.lower() in ['wit']:
-        dataset = pd.read_csv(args.data_path).dropna(subset=['image_url'])\
-                        .drop_duplicates(subset=['image_url'], ignore_index=True)\
-                        .sort_values(['image_url'], ignore_index=True)
+        datasets = []
+        for split in ["test", "validation", "train"]:
+            datasets.append(load_dataset("SEACrowd/wit", name="wit_source", trust_remote_code=True, split=split))
+        dataset = concatenate_datasets(datasets).sort('image_url')
         image_url_col = 'image_url'
         image_name_col = 'page_title'
         ref_embeddings = load_embeddings([os.path.join(args.embed_dir, f) for f in ['cvqa', 'sea-vqa']])
         
-        filename, _ext = os.path.splitext(os.path.basename(args.data_path))
-        cache_dir = os.path.join(cache_dir, filename)
-        os.makedirs(cache_dir, exist_ok=True)
-        image_dir = os.path.join(image_dir, filename)
-        os.makedirs(image_dir, exist_ok=True)
-        embed_dir = os.path.join(embed_dir, filename)
-        os.makedirs(embed_dir, exist_ok=True)
     else:
         raise ValueError("Unrecognized action {}. Please choose between 'cvqa', 'sea-vqa', and 'wit'.")
     
@@ -274,8 +269,21 @@ def main(args):
     started_at = time.monotonic()
     worker = Thread(target=get_embedding, args=(queue, model, save_fn, ref_embeddings), daemon=True)
     worker.start()
-    producer(queue, query_fn, dataset, image_col, image_url_col,
-                                  image_name_col, image_dir=image_dir, embed_dir=embed_dir)
+    threads = []
+    data_len = len(dataset)
+    thread_size = -(data_len // -args.num_thread) # ceil division
+    for i in range(args.num_thread):
+        start_idx = i * thread_size
+        end_idx = min((i + 1) * thread_size, data_len)
+        cur_dataset = dataset.select(range(start_idx, end_idx))
+        t = Thread(target=producer, args=(queue, query_fn, cur_dataset, image_col, image_url_col,
+                    image_name_col, image_dir, embed_dir, (start_idx + 1), data_len))
+        t.start()
+        threads.append(t)
+
+    for t in threads:
+        t.join()
+
     exec_time = time.monotonic() - started_at
     print('Finished in {} seconds'.format(exec_time))
 
@@ -285,10 +293,12 @@ def get_arguments():
     parser.add_argument('--image_dir', type=str, required=True, help="")
     parser.add_argument('--embed_dir', type=str, required=True, help="")
     parser.add_argument('--action', type=str, required=True)
-    parser.add_argument('--data_path', type=str, required=True, help="Only for WIT")
+    parser.add_argument('--data_path', type=str, default=None, help="Only for WIT")
     parser.add_argument('--cache_dir', type=str, default='.cache', help="")
+    parser.add_argument('--num_thread', type=int, default=1, help="")
     parser.add_argument('--min_size', type=int, default=50, help="")
     parser.add_argument('--batch_size', type=int, default=32, help="")
+    parser.add_argument('--serialize', default=False, action='store_true', help='train the model')
 
     return parser.parse_args()
 
