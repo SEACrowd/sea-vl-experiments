@@ -1,0 +1,31 @@
+type,dataset,threshold,relevance_percent,image_proportion_percent
+culturally-relevant,CC3M,[51.5 ... 52.5),58,0.4
+culturally-relevant,CC3M,[52.5 ... 53.5),70,0.23
+culturally-relevant,CC3M,[53.5 ... 54.5),78,0.13
+culturally-relevant,CC3M,[54.5 ... 55.5),84,0.07
+culturally-relevant,CC3M,>= 55.5,92,0.05
+culturally-relevant,COYO,[51.5 ... 52.5),54,0.54
+culturally-relevant,COYO,[52.5 ... 53.5),40,0.36
+culturally-relevant,COYO,[53.5 ... 54.5),70,0.24
+culturally-relevant,COYO,[54.5 ... 55.5),82,0.14
+culturally-relevant,COYO,>= 55.5,78,0.14
+culturally-relevant,WIT,[51.5 ... 52.5),80,0.23
+culturally-relevant,WIT,[52.5 ... 53.5),82,0.13
+culturally-relevant,WIT,[53.5 ... 54.5),92,0.06
+culturally-relevant,WIT,[54.5 ... 55.5),94,0.03
+culturally-relevant,WIT,>= 55.5,90,0.02
+others,CC3M,[51.5 ... 52.5),,99.6
+others,CC3M,[52.5 ... 53.5),,99.77
+others,CC3M,[53.5 ... 54.5),,99.87
+others,CC3M,[54.5 ... 55.5),,99.93
+others,CC3M,>= 55.5,,99.95
+others,COYO,[51.5 ... 52.5),,99.46
+others,COYO,[52.5 ... 53.5),,99.64
+others,COYO,[53.5 ... 54.5),,99.76
+others,COYO,[54.5 ... 55.5),,99.86
+others,COYO,>= 55.5,,99.86
+others,WIT,[51.5 ... 52.5),,99.77
+others,WIT,[52.5 ... 53.5),,99.87
+others,WIT,[53.5 ... 54.5),,99.94
+others,WIT,[54.5 ... 55.5),,99.97
+others,WIT,>= 55.5,,99.98
