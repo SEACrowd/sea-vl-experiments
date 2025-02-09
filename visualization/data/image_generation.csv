@@ -1,0 +1,31 @@
+type,model,category,aspect_type,aspect,score
+Human-collected,Natural Image,Cuisine,Correctness,Cuisine\n(Correctness),2.94
+Human-collected,Natural Image,Cuisine,Naturalness,Cuisine\n(Naturalness),3.00
+Human-collected,Natural Image,Tradition,Correctness,Tradition\n(Correctness),2.68
+Human-collected,Natural Image,Tradition,Naturalness,Tradition\n(Naturalness),2.98
+Human-collected,Natural Image,Landmark,Correctness,Landmark\n(Correctness),2.93
+Human-collected,Natural Image,Landmark,Naturalness,Landmark\n(Naturalness),2.98
+Model-generated,Janus Pro (7B),Cuisine,Correctness,Cuisine\n(Correctness),1.08
+Model-generated,Janus Pro (7B),Cuisine,Naturalness,Cuisine\n(Naturalness),1.02
+Model-generated,Janus Pro (7B),Tradition,Correctness,Tradition\n(Correctness),1.20
+Model-generated,Janus Pro (7B),Tradition,Naturalness,Tradition\n(Naturalness),1.00
+Model-generated,Janus Pro (7B),Landmark,Correctness,Landmark\n(Correctness),1.07
+Model-generated,Janus Pro (7B),Landmark,Naturalness,Landmark\n(Naturalness),1.02
+Model-generated,FLUX.1-Dev,Cuisine,Correctness,Cuisine\n(Correctness),1.10
+Model-generated,FLUX.1-Dev,Cuisine,Naturalness,Cuisine\n(Naturalness),1.02
+Model-generated,FLUX.1-Dev,Tradition,Correctness,Tradition\n(Correctness),1.18
+Model-generated,FLUX.1-Dev,Tradition,Naturalness,Tradition\n(Naturalness),1.00
+Model-generated,FLUX.1-Dev,Landmark,Correctness,Landmark\n(Correctness),1.00
+Model-generated,FLUX.1-Dev,Landmark,Naturalness,Landmark\n(Naturalness),1.05
+Model-generated,Stable Diffusion 2,Cuisine,Correctness,Cuisine\n(Correctness),1.10
+Model-generated,Stable Diffusion 2,Cuisine,Naturalness,Cuisine\n(Naturalness),1.02
+Model-generated,Stable Diffusion 2,Tradition,Correctness,Tradition\n(Correctness),1.18
+Model-generated,Stable Diffusion 2,Tradition,Naturalness,Tradition\n(Naturalness),1.00
+Model-generated,Stable Diffusion 2,Landmark,Correctness,Landmark\n(Correctness),1.05
+Model-generated,Stable Diffusion 2,Landmark,Naturalness,Landmark\n(Naturalness),1.05
+Model-generated,Stable Diffusion 3.5,Cuisine,Correctness,Cuisine\n(Correctness),1.42
+Model-generated,Stable Diffusion 3.5,Cuisine,Naturalness,Cuisine\n(Naturalness),1.70
+Model-generated,Stable Diffusion 3.5,Tradition,Correctness,Tradition\n(Correctness),1.38
+Model-generated,Stable Diffusion 3.5,Tradition,Naturalness,Tradition\n(Naturalness),1.06
+Model-generated,Stable Diffusion 3.5,Landmark,Correctness,Landmark\n(Correctness),1.09
+Model-generated,Stable Diffusion 3.5,Landmark,Naturalness,Landmark\n(Naturalness),1.05
