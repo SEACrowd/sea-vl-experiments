@@ -1,0 +1,6 @@
+torch>=1.9.0
+torchvision>=0.10.0
+pillow>=8.2.0
+tqdm>=4.61.0
+transformers>=4.30.0
+einops
