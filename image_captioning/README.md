@@ -33,6 +33,8 @@ git clone https://github.com/LLaVA-VL/LLaVA-NeXT
 cd sea-vl-experiments/image_captioning/src
 python main.py
 ```
+> [!NOTE]
+> If you don't pass the **generation parameters**, the defaults (greedy decoding) specified in `Config/settings.py` will be used.
 - Available arguments:
     - --dataset: Currently supports ["seavqa", "worldcuisines"]
     - --model: Currently supports ["maya", "paligemma2", "pangea", "qwenvl2"]
@@ -50,15 +52,12 @@ python main.py
             - ms_location_aware_prompt
             - tl_location_aware_prompt
             - id_location_aware_prompt
-            - vi_location_aware_prompt 
-    - Other generation parameters:
-        > [!TIP]
-        > - If you don't pass these parameters, the defaults (greedy decoding) specified in your configuration file will be used.
-        - max_new_tokens 
-        - do_sample
-        - num_beams
-        - use_cache
-        - temperature
-        - top_p
-        - top_k 
-
+            - vi_location_aware_prompt
+        - Other generation parameters:
+            - max_new_tokens
+            - do_sample
+            - num_beams
+            - use_cache
+            - temperature
+            - top_p
+            - top_k 
