@@ -53,7 +53,7 @@ python main.py
             - vi_location_aware_prompt 
     - Other generation parameters:
         > [!NOTE]
-        > If you don't pass these parameters, the defaults (greedy decoding) specified in your configuration file will be used.
+        > - If you don't pass these parameters, the defaults (greedy decoding) specified in your configuration file will be used.
         - max_new_tokens 
         - do_sample
         - num_beams
