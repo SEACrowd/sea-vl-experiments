@@ -24,12 +24,13 @@ git clone https://github.com/LLaVA-VL/LLaVA-NeXT
 ### Configure the project:
 > [!IMPORTANT]
 > 1. Open `Config/settings.py` and update the following settings with absolute paths as needed:
->     - Replace `Maya_path` with the **absolute path** of the cloned Maya repository.
+>    - Replace `Maya_path` with the **absolute path** of the cloned Maya repository.
 >    - Replace `LLaVA-NeXT_path` with the **absolute path** of the cloned LLaVA-NeXT repository.
 >    - Replace `RESULTS_DIR` with the **absolute path** where you want to save the results.
 >    - Adjust other settings based on your configuration, you can leave it as default also.
 ### Run the script:
 ```bash
+cd sea-vl-experiments/image_captioning/src
 python main.py
 ```
 - Available arguments:
