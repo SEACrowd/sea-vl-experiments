@@ -52,7 +52,7 @@ python main.py
             - id_location_aware_prompt
             - vi_location_aware_prompt 
     - Other generation parameters:
-        > [!NOTE] 
+        > [!NOTE]
         > If you don't pass these parameters, the defaults (greedy decoding) specified in your configuration file will be used.
         - max_new_tokens 
         - do_sample
