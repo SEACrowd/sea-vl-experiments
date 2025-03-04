@@ -22,12 +22,12 @@ git clone https://github.com/LLaVA-VL/LLaVA-NeXT
 
 ## How to Use
 ### Configure the project:
-[!IMPORTANT]
-1. Open `Config/settings.py` and update the following settings with absolute paths as needed:
-    - Replace `Maya_path` with the **absolute path** of the cloned Maya repository.
-    - Replace `LLaVA-NeXT_path` with the **absolute path** of the cloned LLaVA-NeXT repository.
-    - Replace `RESULTS_DIR` with the **absolute path** where you want to save the results.
-    - Adjust other settings based on your configuration, you can leave it as default also.
+> [!IMPORTANT]
+> 1. Open `Config/settings.py` and update the following settings with absolute paths as needed:
+>     - Replace `Maya_path` with the **absolute path** of the cloned Maya repository.
+>    - Replace `LLaVA-NeXT_path` with the **absolute path** of the cloned LLaVA-NeXT repository.
+>    - Replace `RESULTS_DIR` with the **absolute path** where you want to save the results.
+>    - Adjust other settings based on your configuration, you can leave it as default also.
 ### Run the script:
 ```bash
 python main.py
@@ -51,7 +51,7 @@ python main.py
             - id_location_aware_prompt
             - vi_location_aware_prompt 
     - Other generation parameters:
-        - [!NOTE] If you don't pass these parameters, the defaults (greedy decoding) specified in your configuration file will be used.
+        > [!NOTE] If you don't pass these parameters, the defaults (greedy decoding) specified in your configuration file will be used.
         - max_new_tokens 
         - do_sample
         - num_beams
