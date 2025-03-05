@@ -1,4 +1,4 @@
-# Image Deduplicator
+# Image Hashing
 
 A Python module for finding duplicate and similar images using hashing techniques.
 
@@ -86,7 +86,7 @@ This will find duplicate images in the specified folder, print the groups of dup
 
 
 ```
-python main.py path/to/images --hash-type phash --threshold 8 --csv duplicates.csv --csv
+python main.py path/to/images --hash-type phash --threshold 8 --csv duplicates.csv
 ```
 
 This will find duplicate images in the specified folder, save the results in a CSV file.

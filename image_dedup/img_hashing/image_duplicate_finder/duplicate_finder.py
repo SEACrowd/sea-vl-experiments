@@ -117,7 +117,15 @@ class ImageDuplicateFinder:
         if not folder.exists():
             raise ValueError(f"Folder {folder_path} does not exist")
 
-        image_extensions = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".heic"}
+        image_extensions = {
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".gif",
+            ".bmp",
+            ".tiff",
+            ".heic",
+        }
         image_hashes = {}
         image_paths = list(folder.rglob("*"))
 
@@ -180,7 +188,9 @@ class ImageDuplicateFinder:
         return dict(groups)
 
     def remove_duplicates(
-        self, folder_path: str, groups: dict[str, set[Path]]
+        self,
+        folder_path: str,
+        groups: dict[str, set[Path]],
     ) -> None:
         """Remove duplicate images, keeping only one image from each duplicate group.
 
@@ -196,7 +206,7 @@ class ImageDuplicateFinder:
         # Iterate over each group and remove all but one image
         for group_id, paths in groups.items():
             paths = sorted(
-                paths
+                paths,
             )  # Sort paths to keep the first image in the list
 
             # Keep the first image, remove the rest
