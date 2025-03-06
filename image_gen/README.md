@@ -12,11 +12,12 @@ conda activate image_generation
 cd sea-vl-experiments/image_gen
 pip install -r requirements.txt
 ```
-### Update required sub-module:
+### Clone required dependencies:
 ```bash
-# For Janus-Pro
-cd janus_pro
-git submodule update --init --recursive
+# For Janus-Pro:
+git clone https://github.com/deepseek-ai/Janus.git
+cd Janus
+pip install -e .
 ```
     
 ## How to Use 

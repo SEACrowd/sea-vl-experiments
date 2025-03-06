@@ -103,11 +103,10 @@ for data in tqdm(cultures):
         system_prompt="",
     )
 
-    prompt = sft_format + vl_chat_processor.image_start_tag
 
     generate(
         vl_gpt,
         vl_chat_processor,
-        prompt,
+        sft_format + vl_chat_processor.image_start_tag,
         f'{folder}/[{data["country"]}] {prompt.format(data["landmark_name"]).replace("/", " or ")}.png'
     )

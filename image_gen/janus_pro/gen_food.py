@@ -111,11 +111,10 @@ for k,v in tqdm(enumerate(dataset)):
         system_prompt="",
     )
 
-    prompt = sft_format + vl_chat_processor.image_start_tag
 
     generate(
         vl_gpt,
         vl_chat_processor,
-        prompt,
+        sft_format + vl_chat_processor.image_start_tag,
         f'{folder}/[{",".join(v["cuisines"])}] {prompt.format(v["name"])}.png'
     )
